@@ -12,11 +12,13 @@ import android.graphics.Color;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.Looper;
 import android.os.Message;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Adapter;
 import android.widget.AdapterView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
@@ -44,11 +46,17 @@ public class MainActivity extends AppCompatActivity {
     Message msg;
     Bundle bundle;
     private LinearLayout mainLayout;
+    Handler handler = new Handler(Looper.getMainLooper());
+    LinearLayout layout;
+    ProgressBar pBar;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         rv = findViewById(R.id.rv);
+        pBar = findViewById(R.id.p_bar);
+        pBar.setVisibility(View.VISIBLE);
+        mainLayout = findViewById(R.id.mainLayout);
         rv.setLayoutManager(new LinearLayoutManager(this));
         // 設置格線
         rv.addItemDecoration(new DividerItemDecoration(this, DividerItemDecoration.VERTICAL));
@@ -60,11 +68,33 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
-    class GetWebInfo extends AsyncTask<String,Void,String>{
+
+    class GetWebInfo extends AsyncTask<String,Integer,String>{
 
 
         @Override
+        protected void onPreExecute() {
+            pBar.setLayoutParams(new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
+            pBar.setForegroundGravity(Gravity.CENTER);
+            pBar.setBackgroundColor(Color.GREEN);
+            pBar.setAlpha( 0.7f);
+
+            //
+            pBar.setVisibility(View.VISIBLE);
+            //
+            Toast.makeText(MainActivity.this, "開始下載 ...", Toast.LENGTH_SHORT).show();
+         }
+
+        @Override
         protected String doInBackground(String... strings) {
+            for (int i=0; i<100; i++) {
+                try {
+                    Thread.sleep(10);
+                    pBar.setProgress(i);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
 
             String result =  getData(strings[0]);
             return result;
@@ -72,6 +102,8 @@ public class MainActivity extends AppCompatActivity {
 
         @Override
         protected void onPostExecute(String msg) {
+            pBar.setVisibility(View.GONE);
+            mainLayout.removeView(pBar);
             super.onPostExecute(msg);
             try {
                 JSONArray array = new JSONArray(msg);
@@ -99,6 +131,12 @@ public class MainActivity extends AppCompatActivity {
                 rv.setAdapter(adapter);
                 adapter.notifyDataSetChanged();
             }
+        }
+
+        @Override
+        protected void onProgressUpdate(Integer... values) {
+            pBar.setProgress(values[0]);
+            super.onProgressUpdate(values);
         }
     }
 
@@ -131,17 +169,5 @@ public class MainActivity extends AppCompatActivity {
         return sb.toString();
     }
 
-//    class uiHandler extends Handler {
-//        @Override
-//        public void handleMessage(@NonNull Message msg) {
-//            super.handleMessage(msg);
-//            Bundle bundle = msg.getData();
-//            List<SiteName> data =(List<SiteName>)bundle.getSerializable("data");
-//            adapter = new NetAdapter(data);
-//            rv.setAdapter(adapter);
-//            adapter.notifyDataSetChanged();
-//        }
-//
-//
-//    }
+
 }

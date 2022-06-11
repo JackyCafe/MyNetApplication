@@ -4,11 +4,21 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:id="@+id/mainLayout"
+    android:orientation="vertical"
     tools:context=".MainActivity">
+    <ProgressBar
+        android:id="@+id/p_bar"
+        android:indeterminate="false"
+        android:layout_width="match_parent"
+        android:layout_height="10dp"
+        style="@android:style/Widget.ProgressBar.Horizontal"
+        android:progressDrawable="@drawable/greenprogress"
 
+        />
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/rv"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
       />
 
